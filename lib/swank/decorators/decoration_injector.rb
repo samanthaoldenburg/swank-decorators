@@ -25,6 +25,7 @@ module Swank
 
         private
 
+        # @return [Swank::Decorators::DecorationInjector]
         def decoration_injector
           class_variable_get(:@@swank_decoration_injector)
         end
@@ -48,7 +49,6 @@ module Swank
 
         subject.singleton_class.prepend InjectionHook
         subject.class_variable_set(:@@swank_decoration_injector, instance)
-        subject.class_variable_set(:@@swank_decoration_contexts, {})
 
         instance
       end
@@ -71,49 +71,63 @@ module Swank
       # The next time we add a method, it'll be injected with this decorator and
       # any others in the queue.
       #
-      # @param decorator_name [Symbol] name of the decorator.
-      # @see {Swank::Decorators::MethodDecorator#decorator_name}
-      # @param decoration_context [Swank::Decorators::DecorationContext]
+      # @param decorator [Swank::Decorator::DecoratorBase] the decorator
       #
       # @see {DecorationInjector::InjectionHook#method_added}
       # @see {DecorationInjector::InjectionHook#singleton_method_added}
-      def queue_decoration(decorator_name, decoration_context)
-        @queued_decorations[decorator_name] = decoration_context
+      def queue_decoration(decorator_name, *args, **kwargs, &block)
+        decorator_class = decorators[decorator_name]
+        @queued_decorations[decorator_name] = decorator_class.new(*args, **kwargs, &block)
       end
 
+      # Inject the queued decorations into the injector
       def inject_decorations!(method_name, mode:)
         until @queued_decorations.empty?
-          decorator_name, decoration_context = @queued_decorations.shift
-
-          decoration_context.set_method_name(method_name)
-
-          decoration_contexts[method_name] ||= {}
-          decoration_contexts[method_name][mode] = decoration_context
+          decorator_name, decorator = @queued_decorations.shift
 
           decoration_injection_module = decoration_injection_modules.dig(
             decorator_name,
             mode
           )
 
-          decoration_injection_module::DecorationContextSetter.create_context_setter!(
-            method_name,
-            mode
-          )
-
           decoration_injection_module.define_method(
             method_name,
-            &decorators[decorator_name].wrap_block
+            &decorator.wrap_block
           )
         end
       end
 
+      # Register an entire set of decorators from a module
+      # @param decorators_modules [Module] a module that has extended `Swank::Decorators`
+      def register_decorators!(decorators_module)
+        decorators_module.swank_decorators.each do |decorator_name, decorator_class|
+          if decorators[decorator_name]
+            warn "Decorator #{decoration_name} already defined for #{subject}"
+          end
+
+          register_decorator!(decorator_name, decorator_class)
+          define_decorator_method!(decorator_name)
+        end
+      end
+
+      # @return [Hash{Symbol => Class<Swank::Decoratos::DecoratorBase>}]
+      def decorators
+        @decorators ||= {}
+      end
+
+      # @return [Hash{Symbol => Hash{:instance, :singleton => Module}}]
+      def decoration_injection_modules
+        @decoration_injection_modules ||= {}
+      end
+
+      private
+
       # Register a type of decorator to {#subject}
       #
-      # This involves:
-      #
-      def register_decorator!(decorator)
-        decorator_name = decorator.decorator_name
-        decorators[decorator_name] = decorator
+      # This involves creating modules that prepend {#subject} and
+      # `subject.singleton_class`
+      def register_decorator!(decorator_name, decorator_class)
+        decorators[decorator_name] = decorator_class
         return if decoration_injection_modules[decorator_name].is_a? Hash
 
         instance_module = Module.new
@@ -124,34 +138,20 @@ module Swank
           singleton: singleton_module
         }
 
-        decoration_injection_modules[decorator_name].values.each(
-          &method(:prepend_context_setter!)
-        )
-
         @subject.prepend instance_module
         @subject.singleton_class.prepend singleton_module
       end
 
-      def decoration_injection_modules
-        @decoration_injection_modules ||= {}
+      def define_decorator_method!(decorator_name)
+        subject.singleton_class.class_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def #{decorator_name}!(...)
+            class_variable_get(:@@swank_decoration_injector).queue_decoration(
+              :#{decorator_name}, ...
+            )
+          end
+        RUBY
       end
 
-      def decorators
-        @decorators ||= {}
-      end
-
-      def decoration_contexts
-        @subject.class_variable_get(:@@swank_decoration_contexts)
-      end
-
-      def prepend_context_setter!(decoration_injection_module)
-        context_setter = Module.new
-        context_setter.extend Swank::Decorators::DecorationContextSetter
-
-        decoration_injection_module.const_set(:DecorationContextSetter, context_setter)
-
-        decoration_injection_module.prepend context_setter
-      end
     end
   end
 end
