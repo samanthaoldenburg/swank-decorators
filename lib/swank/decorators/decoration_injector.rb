@@ -85,7 +85,7 @@ module Swank
         until @queued_decorations.empty?
           decorator_name, decorator = @queued_decorations.shift
 
-          decoration_injection_module = decoration_injection_modules.dig(
+          decoration_injection_module = fetch_decorator_prepend_module(
             decorator_name,
             mode
           )
@@ -122,24 +122,35 @@ module Swank
 
       private
 
+      # @param decorator_name [Symbol]
+      # @param scope [:instance, :singleton]
+      # @return [Module]
+      def fetch_decorator_prepend_module(decorator_name, scope)
+        modul = decoration_injection_modules.dig(decorator_name, scope)
+
+        return modul if modul
+
+        modul = Module.new
+
+        decoration_injection_modules[decorator_name][scope] = modul
+
+        case scope
+        when :instance then @subject.prepend modul
+        when :singleton then @subject.singleton_class.prepend modul
+        else
+          raise ArgumentError, "scope must be :instance or :singleton"
+        end
+
+        modul
+      end
+
       # Register a type of decorator to {#subject}
       #
       # This involves creating modules that prepend {#subject} and
       # `subject.singleton_class`
       def register_decorator!(decorator_name, decorator_class)
         decorators[decorator_name] = decorator_class
-        return if decoration_injection_modules[decorator_name].is_a? Hash
-
-        instance_module = Module.new
-        singleton_module = Module.new
-
-        decoration_injection_modules[decorator_name] = {
-          instance: instance_module,
-          singleton: singleton_module
-        }
-
-        @subject.prepend instance_module
-        @subject.singleton_class.prepend singleton_module
+        decoration_injection_modules[decorator_name] = {}
       end
 
       def define_decorator_method!(decorator_name)
