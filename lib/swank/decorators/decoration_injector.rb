@@ -155,14 +155,20 @@ module Swank
 
       def define_decorator_method!(decorator_name)
         subject.singleton_class.class_eval <<~RUBY, __FILE__, __LINE__ + 1
-          def #{decorator_name}!(...)
-            class_variable_get(:@@swank_decoration_injector).queue_decoration(
-              :#{decorator_name}, ...
-            )
+          def #{decorator_name}(scope, method_name, ...)
+            injector = class_variable_get(:@@swank_decoration_injector)
+            injector.queue_decoration(:#{decorator_name}, ...)
+            injector.inject_decorations!(method_name, mode: scope)
           end
         RUBY
-      end
 
+        subject.instance_variable_set(
+          :"@#{decorator_name}",
+          proc do |*args, **kwargs, &block|
+            queue_decoration(decorator_name, *args, **kwargs, &block)
+          end
+        )
+      end
     end
   end
 end
