@@ -1,5 +1,7 @@
 # lib/decoration_injector.rb
 
+require "swank/decorators/ivar_dsl"
+
 module Swank
   module Decorators
     class DecorationInjector
@@ -155,18 +157,22 @@ module Swank
 
       def define_decorator_method!(decorator_name)
         subject.singleton_class.class_eval <<~RUBY, __FILE__, __LINE__ + 1
-          def #{decorator_name}(scope, method_name, ...)
+          def #{decorator_name}(method_name, ...)
             injector = class_variable_get(:@@swank_decoration_injector)
             injector.queue_decoration(:#{decorator_name}, ...)
-            injector.inject_decorations!(method_name, mode: scope)
+            injector.inject_decorations!(method_name, mode: :instance)
+          end
+
+          def #{decorator_name}_singleton_method(method_name, ...)
+            injector = class_variable_get(:@@swank_decoration_injector)
+            injector.queue_decoration(:#{decorator_name}, ...)
+            injector.inject_decorations!(method_name, mode: :singleton)
           end
         RUBY
 
         subject.instance_variable_set(
           :"@#{decorator_name}",
-          proc do |*args, **kwargs, &block|
-            queue_decoration(decorator_name, *args, **kwargs, &block)
-          end
+          IvarDsl.new(decorator_name, self)
         )
       end
     end

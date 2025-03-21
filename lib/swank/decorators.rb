@@ -11,7 +11,7 @@ module Swank
     # @param name [Symbol] the name of the decorator
     # @return [Swank::Decorators::DecoratorWithoutContext]
     #
-    # @xample
+    # @example
     #   module ConstStaticMethods
     #     extend Swank::Decorations
     #
@@ -29,7 +29,7 @@ module Swank
     #
     #     # Get a list of all roles in the user database
     #     # @return [Array<Symbol>]
-    #     const_static!
+    #     !@const_static
     #     def self.all_user_roles
     #       select(:role).uniq.map(&:to_sym)
     #     end
@@ -66,7 +66,7 @@ module Swank
     #
     #     # Get the monthly payment amoutn
     #     # @return [Float]
-    #     round_result! to_precision: 2 # round to the nearest cent
+    #     @round_result[to_precision: 2] # round to the nearest cent
     #     def calculate_installment_amount
     #       amount / term.to_f
     #     end
