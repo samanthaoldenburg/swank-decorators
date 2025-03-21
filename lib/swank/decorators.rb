@@ -35,9 +35,7 @@ module Swank
     #     end
     #   end
     def def_decorator(name, &block)
-      swank_decorators[name] ||= Class.new(Swank::Decorators::DecoratorWithoutContext)
-      swank_decorators[name].setup(name, block)
-      swank_decorators[name]
+      set_decorator(DecoratorWithoutContext, name, &block)
     end
 
     # Define a factory that can create decorations
@@ -73,9 +71,7 @@ module Swank
     #       amount / term.to_f
     #     end
     def def_decorator_factory(name, &block)
-      swank_decorators[name] ||= Class.new(Swank::Decorators::DecoratorWithContext)
-      swank_decorators[name].setup(name, block)
-      swank_decorators[name]
+      set_decorator(DecoratorWithContext, name, &block)
     end
 
     # The decorators defined in the namespace
@@ -102,6 +98,13 @@ module Swank
     end
 
     class Error < StandardError; end
-    # Your code goes here...
+
+    private
+
+    def set_decorator(decorator_class, name, &block)
+      swank_decorators[name] ||= Class.new(decorator_class)
+      swank_decorators[name].setup(name, block)
+      swank_decorators[name]
+    end
   end
 end
