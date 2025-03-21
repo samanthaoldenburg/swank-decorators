@@ -102,9 +102,21 @@ module Swank
     private
 
     def set_decorator(decorator_class, name, &block)
-      swank_decorators[name] ||= Class.new(decorator_class)
+      if need_to_set_decorator_class?(name, new_class: decorator_class)
+        swank_decorators[name] = Class.new(decorator_class)
+      end
+
       swank_decorators[name].setup(name, block)
       swank_decorators[name]
+    end
+
+    # We need to set a new value for `swank_decorators[name]` when:
+    #   1. `swank_decorators[name]` has no value
+    #   2. `swank_decorators[name]` is a child class of something other than `new_class`
+    #     a. Example: This is being redefined from a decorator to a decorator factor
+    def need_to_set_decorator_class?(name, new_class:)
+      return true unless swank_decorators[name].is_a?(Class)
+      !(swank_decorators[name] < new_class)
     end
   end
 end
