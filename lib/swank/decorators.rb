@@ -37,6 +37,7 @@ module Swank
     def def_decorator(name, &block)
       swank_decorators[name] ||= Class.new(Swank::Decorators::DecoratorWithoutContext)
       swank_decorators[name].setup(name, block)
+      swank_decorators[name]
     end
 
     # Define a factory that can create decorations
@@ -74,6 +75,7 @@ module Swank
     def def_decorator_factory(name, &block)
       swank_decorators[name] ||= Class.new(Swank::Decorators::DecoratorWithContext)
       swank_decorators[name].setup(name, block)
+      swank_decorators[name]
     end
 
     # The decorators defined in the namespace
