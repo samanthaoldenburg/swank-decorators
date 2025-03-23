@@ -2,7 +2,7 @@ module ConstStaticDecorator
   extend Swank::Decorators
 
   def_decorator :const_static do |func|
-    const_name = "CONST_STATIC_#{__method__}"
+    const_name = "CONST_STATIC_#{func.method_name}"
 
     const_get(const_name)
   rescue NameError => _

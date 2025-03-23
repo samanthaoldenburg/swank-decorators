@@ -5,6 +5,14 @@ require "swank/decorators/ivar_dsl"
 module Swank
   module Decorators
     class DecorationInjector
+      # A proc runs all the decorators for a method
+      class DecoratorChain < Proc
+        # The name of the method we are currently applying decorators to
+        def method_name
+          binding.local_variable_get(:method_name)
+        end
+      end
+
       # Module that actually overrides methods to add injections
       module DecorationPrepender
         def self.prepended(klass)
@@ -36,7 +44,7 @@ module Swank
           value = nil
           current = call_sequence
 
-          invocation = proc do |*a, **k|
+          invocation = DecoratorChain.new do |*a, **k|
             # Preserve updates to params, or re-supply them if previous
             # decorator didn't supply them
             a.none? ? a = args : args = a
