@@ -1,3 +1,4 @@
+require "pry"
 # An example decorator module with decorators for thread operations
 module ThreadDecorators
   extend Swank::Decorators
@@ -20,8 +21,8 @@ module ThreadDecorators
   #     end
   #
   #   end
-  def_decorator :async do |*args, **kwargs, &block|
-    Thread.new { super(*args, **kwargs, &block) }
+  def_decorator :async do |func|
+    Thread.new { func.call }
   end
 
   # Decorate the method to memoize in a Thread-local variable
@@ -37,8 +38,6 @@ module ThreadDecorators
   #     end
   #   end
   def_decorator_factory :thread_local_cache do |var_name|
-    ->(*args, **kwargs, &block) {
-      Thread.current[var_name] ||= super(*args, **kwargs, &block)
-    }
+    ->(func) { Thread.current[var_name] ||= func.call }
   end
 end

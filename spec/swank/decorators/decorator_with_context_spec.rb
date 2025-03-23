@@ -7,19 +7,19 @@ RSpec.describe Swank::Decorators::DecoratorWithContext do
       extend Swank::Decorators
 
       def_decorator_factory :add do |num|
-        ->(*args, **kwargs, &block) { super(*args, **kwargs, &block) + num }
+        ->(func) { func.call + num }
       end
 
       def_decorator_factory :subtract do |by: 1|
-        ->(*args, **kwargs, &block) { super(*args, **kwargs, &block) - by }
+        ->(func) { func.call - by }
       end
 
       def_decorator_factory :mult do |num|
-        ->(*args, **kwargs, &block) { super(*args, **kwargs, &block) * num }
+        ->(func) { func.call * num }
       end
 
       def_decorator_factory :perform_additional_processing do |b|
-        ->(*args, **kwargs, &block) { b.call(super(*args, **kwargs, &block)) }
+        ->(func) { b.call(func.call) }
       end
     end.tap { |m| stub_const("MathDecorators", m) }
   }
@@ -38,11 +38,13 @@ RSpec.describe Swank::Decorators::DecoratorWithContext do
       def self.bar(a, b)
         a * b
       end
+
+      add_singleton_method :bar, 3
     end
   }
 
   it "can create decorators that can be flexed with parameters" do
     expect(dummy.foo).to eq 4
-    expect(dummy.bar(2, 3)).to eq 48
+    expect(dummy.bar(2, 3)).to eq 57
   end
 end
