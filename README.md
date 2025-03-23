@@ -18,7 +18,7 @@ end
 class User < ApplicationRecord
   include ThreadDecorators
 
-  !@async
+  +@async
   def asave(...)
     save(...)
   end
