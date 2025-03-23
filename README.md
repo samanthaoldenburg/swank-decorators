@@ -1,43 +1,116 @@
 # Swank::Decorators
 
-TODO: Delete this and the text below, and describe your gem
+Python-inspired decorators with relatively low performance costs. 
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/swank/decorators`. To experiment with that code, run `bin/console` for an interactive prompt.
+## Basic Usage
 
-## Installation
+### Simple Decorators
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+``` ruby
+require "swank/decorators"
 
-Install the gem and add to the application's Gemfile by executing:
+module ThreadDecorators
+  def_decorator :async do |func|
+    Thread.new { func.call }
+  end
+end
 
-```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+class User < ApplicationRecord
+  include ThreadDecorators
+
+  !@async
+  def asave(...)
+    save(...)
+  end
+end
 ```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+### Decorator Factory / Parameterized Decorators
 
-```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+``` ruby
+require "swank/decorators"
+
+module ThreadDecorators
+  def_decorator_factory :thread_local_cache do |var_name|
+    ->(func) { Thread.current[var_name] ||= func.call }
+  end
+end
+
+class SessionHelper
+  include ThreadDecorators
+ 
+  @thread_local_cache[:session_uuid]
+  def session_uuid
+    SecureRandom.uuid
+  end
+end
 ```
 
-## Usage
+## Comparison to `ActiveSupport::Callbacks`
 
-TODO: Write usage instructions here
+### Speed
 
-## Development
+A major goal of mine was to make something at least as fast as Rail's `ActiveSupport::Callbacks`:
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+``` 
+ruby 3.3.2 (2024-05-30 revision e5a195edf6) [x86_64-linux]
+Warming up --------------------------------------
+     Rails Callbacks    38.009k i/100ms
+               Swank    51.651k i/100ms
+Calculating -------------------------------------
+     Rails Callbacks    395.098k (+/- 0.3%) i/s    (2.53 microseconds/i) -    798.189k in   2.020244s
+               Swank    513.736k (+/- 0.2%) i/s    (1.95 microseconds/i) -      1.033M in   2.010803s
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+Comparison:
+               Swank:   513736.3 i/s
+     Rails Callbacks:   395098.0 i/s - 1.30x  slower
 
-## Contributing
+```
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/swank-decorators. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/swank-decorators/blob/main/CODE_OF_CONDUCT.md).
+### Features
 
-## License
+`Swank::Decorators` work similar to an `around` hook, but have several differences.
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+1. Input Interception
 
-## Code of Conduct
+## Advanced Usage
 
-Everyone interacting in the Swank::Decorators project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/swank-decorators/blob/main/CODE_OF_CONDUCT.md).
+### Input Interception
+
+Similar to prepending a method, you can intercept the arguments of a method and
+modify what gets passed on.
+
+> [!INFO] 
+>
+> Input clobbering gets passed on to decorators that haven't run yet (see the `cha_cha_slide` below).
+
+You can work with the positional and keyword arguments passed to the decorated
+method, but not the block passed to the decorated method.
+
+``` ruby
+module InputClobber
+  extend Swank::Decorators
+
+  def_decorator :pos_reversal do |func, *args, **kwargs|
+    func.call(*args.reverse, **kwargs)
+  end
+end
+
+class Foo
+  include InputClobber
+
+  !@pos_reversal
+  def self.division(a, b)
+    a / b
+  end
+
+  !@pos_reversal
+  !@pos_reversal
+  def self.cha_cha_slide(a, b)
+    a / b
+  end
+end
+
+# => Foo.division(2.0, 3.0) # => 3.0
+# => Foo.cha_cha_slide(2.0, 3.0) # => 0.6666666666666666666
+```
