@@ -31,23 +31,26 @@ module Swank
           end
         end
 
-        def run_decorations(method_name, &block)
+        def run_decorations(method_name, *args, **kwargs, &block)
           call_sequence = compile_decorators(method_name)
           value = nil
           current = call_sequence
 
-          invocation = proc do
+          invocation = proc do |*a, **k|
+            # Preserve updates to params, or re-supply them if previous
+            # decorator didn't supply them
+            a.none? ? a = args : args = a
+            k.none? ? k = kwargs : kwargs = k
+
             current = call_sequence
-            if current.final?
-              value = instance_exec(block, &current.wrap_block)
+            if current.nil?
+              value = instance_exec(*a, **k, &block)
             else
               call_sequence = call_sequence.nested
-              value = instance_exec(invocation, &current.wrap_block)
-              call_sequence = current
+              value = instance_exec(invocation, *a, **k, &current.wrap_block)
             end
 
             value
-
           end
 
           invocation.call
@@ -153,9 +156,9 @@ module Swank
           decoration_injection_module.decorators[method_name] = decorations
 
           decoration_injection_module.class_eval <<~RUBY, __FILE__, __LINE__ + 1
-            def #{method_name}(*)
-              run_decorations(:#{method_name}) do
-                super
+            def #{method_name}(*args, **kwargs, &original_method_block)
+              run_decorations(:#{method_name}, *args, **kwargs) do |*a, **k|
+                super(*a, **k, &original_method_block)
               end
             end
           RUBY
