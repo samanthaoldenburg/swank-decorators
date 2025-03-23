@@ -29,18 +29,6 @@ module Swank
       def wrap_block
         raise NotImplementedError
       end
-
-      # @return [DecoratorBase]
-      attr_reader :nested
-
-      def add_to_chain!(decorator)
-        @nested ? nested.add_to_chain!(decorator) : @nested = decorator
-      end
-
-
-      def final?
-        !nested
-      end
     end
   end
 end
