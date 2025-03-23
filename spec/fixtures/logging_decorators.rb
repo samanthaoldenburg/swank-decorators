@@ -1,13 +1,12 @@
 # Example decorator that adds logging to methods
 module LoggingDecorators
-  def_decorator_factory :apm do |name, options_setup: nil, **options|
-    ->(*args, **kwargs, &block) {
-      if options_setup.is_a?(Proc)
-        bindin
-      end
-      Datadog::Tracing.trace(name, **options) do ||
+  extend Swank::Decorators
 
-      end
+  def_decorator_factory :apm do |name, **options, &options_block|
+    ->(func, *args, **kwargs) {
+      options_block&.call(options, *args, **kwargs)
+
+      Datadog::Tracing.trace(name, **options, &func)
     }
   end
 end
