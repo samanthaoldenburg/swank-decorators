@@ -80,7 +80,7 @@ Comparison:
 Similar to prepending a method, you can intercept the arguments of a method and
 modify what gets passed on.
 
-> [!INFO] 
+> [!NOTE]
 >
 > Input clobbering gets passed on to decorators that haven't run yet (see the `cha_cha_slide` below).
 
