@@ -17,10 +17,10 @@ RSpec.describe "Decorator DSL" do
 
   context "For decorators without arguments" do
     describe "I-Var Syntax" do
-      describe "!@decorator_name" do
+      describe "+@decorator_name" do
         subject {
           TestClass.class_eval {
-            !@const_static
+            +@const_static
             def self.foo
               random_num
             end

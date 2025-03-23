@@ -116,9 +116,10 @@ module Swank
       #       select(:role).uniq.map(&:to_sym)
       #     end
       #   end
-      def !(...)
+      def +@(...)
         injector.queue_decoration(decorator_name, ...)
       end
+      alias_method :!, :+@
 
       # Syntactic-sugar useful for a {DecoratorWithContext}
       #
