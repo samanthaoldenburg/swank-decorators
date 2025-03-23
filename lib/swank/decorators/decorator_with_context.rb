@@ -32,8 +32,12 @@ module Swank
             when :keyreq then "#{param_name}:"
             when :key then "#{param_name}: #{NOTHING_STRING}"
             when :block then "&#{param_name}"
+            when :rest
+              (param_name.to_sym == :*) ? "*" : "*#{param_name}"
+            when :keyrest
+              (param_name.to_sym == :**) ? "**" : "**#{param_name}"
             else
-              raise ArgumentError, "Bad param_type #{param_type}"
+              raise ArgumentError, "Bad param_type for #{param_name} - #{param_type}"
             end
           end.join(", ")
         end
@@ -45,8 +49,20 @@ module Swank
             when :req, :opt then variables[:args] << param_name
             when :keyreq, :key then variables[:kwargs] << "#{param_name}: #{param_name}"
             when :block then variables[:block] = param_name
+            when :rest
+              if param_name.to_sym == :*
+                variables[:kwargs] << "*"
+              else
+                variables[:kwargs] << "*#{param_name}"
+              end
+            when :keyrest
+              if param_name.to_sym == :**
+                variables[:kwargs] << "*"
+              else
+                variables[:kwargs] << "**#{param_name}"
+              end
             else
-              raise ArgumentError, "Bad param_type #{param_type}"
+              raise ArgumentError, "Bad param_type for #{param_name} - #{param_type}"
             end
           end
 
