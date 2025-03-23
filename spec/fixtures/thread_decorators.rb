@@ -1,4 +1,3 @@
-require "pry"
 # An example decorator module with decorators for thread operations
 module ThreadDecorators
   extend Swank::Decorators
