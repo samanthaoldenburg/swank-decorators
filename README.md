@@ -101,13 +101,13 @@ end
 class Foo
   include InputClobber
 
-  !@pos_reversal
+  +@pos_reversal
   def self.division(a, b)
     a / b
   end
 
-  !@pos_reversal
-  !@pos_reversal
+  +@pos_reversal
+  +@pos_reversal
   def self.cha_cha_slide(a, b)
     a / b
   end
@@ -138,7 +138,7 @@ end
 class SessionHelper
   include ThreadDecorators
  
-  !@thread_local_cache
+  +@thread_local_cache
   def session_uuid
     SecureRandom.uuid
   end
