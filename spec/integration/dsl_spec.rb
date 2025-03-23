@@ -187,7 +187,7 @@ RSpec.describe "Decorator DSL" do
             {tags: {environment: :production, user_id: id}}
           ).and_yield
 
-          expect(TestClass.ssn_match?(id:, ssn:)).to be false
+          expect(TestClass.ssn_match?(id: id, ssn: ssn)).to be false
         end
       end
     end
