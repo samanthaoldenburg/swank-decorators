@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-latest
     name: Ruby ${{ matrix.ruby }}
     strategy:
@@ -29,3 +29,16 @@ jobs:
           bundler-cache: true
       - name: Run Tests
         run: bundle exec rspec
+
+  lint:
+    runs-on: ubuntu-latest
+    name: Linter - StandardRB
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4.0
+          bundler-cache: true
+      - name: Run Linter
+        run: bundle exec standardrb
