@@ -1,5 +1,9 @@
 # Swank::Decorators
 
+![CI Status](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+
+[![Ruby Code Style](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/standardrb/standard)
+
 Python-inspired decorators with relatively low performance costs. 
 
 ## Basic Usage
