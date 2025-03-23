@@ -37,7 +37,6 @@ module Swank
         @nested ? nested.add_to_chain!(decorator) : @nested = decorator
       end
 
-
       def final?
         !nested
       end

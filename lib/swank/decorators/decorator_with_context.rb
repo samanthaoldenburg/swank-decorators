@@ -50,16 +50,16 @@ module Swank
             when :keyreq, :key then variables[:kwargs] << "#{param_name}: #{param_name}"
             when :block then variables[:block] = param_name
             when :rest
-              if param_name.to_sym == :*
-                variables[:kwargs] << "*"
+              variables[:kwargs] << if param_name.to_sym == :*
+                "*"
               else
-                variables[:kwargs] << "*#{param_name}"
+                "*#{param_name}"
               end
             when :keyrest
-              if param_name.to_sym == :**
-                variables[:kwargs] << "*"
+              variables[:kwargs] << if param_name.to_sym == :**
+                "*"
               else
-                variables[:kwargs] << "**#{param_name}"
+                "**#{param_name}"
               end
             else
               raise ArgumentError, "Bad param_type for #{param_name} - #{param_type}"
