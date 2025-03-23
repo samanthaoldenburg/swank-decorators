@@ -69,13 +69,15 @@ Comparison:
 
 ### Features
 
-`Swank::Decorators` work similar to an `around` hook, but have several differences.
+`Swank::Decorators` work similar to an `around` hook, but has a few differences.
 
-1. Input Interception
+1. Input Manipulation
+2. Output Interception
+3. Method Introspection
 
 ## Advanced Usage
 
-### Input Interception
+### Input Manipulation
 
 Similar to prepending a method, you can intercept the arguments of a method and
 modify what gets passed on.
@@ -113,4 +115,32 @@ end
 
 # => Foo.division(2.0, 3.0) # => 3.0
 # => Foo.cha_cha_slide(2.0, 3.0) # => 0.6666666666666666666
+```
+
+### Method Introspection
+
+#### Dynamically Getting the Decorated Method's Name
+
+You can use `func.method_name` to get the name of the method we are currently decorating.
+
+``` ruby
+require "swank/decorators"
+
+module ThreadDecorators
+  def_decorator_factory :thread_local_cache do |var_name = nil|
+    ->(func) { 
+      thread_local_var_name = var_name ? var_name : func.method_name
+      Thread.current[thread_local_var_name] ||= func.call 
+    }
+  end
+end
+
+class SessionHelper
+  include ThreadDecorators
+ 
+  !@thread_local_cache
+  def session_uuid
+    SecureRandom.uuid
+  end
+end
 ```
