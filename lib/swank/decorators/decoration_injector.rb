@@ -15,10 +15,6 @@ module Swank
 
       # Module that actually overrides methods to add injections
       module DecorationPrepender
-        def self.prepended(klass)
-          klass.instance_variable_set(:@swank_decorators, {})
-        end
-
         def self.clone_for_scope(scope)
           dup.tap do |m|
             m.class_variable_set(:@@swank_decorators, {})
