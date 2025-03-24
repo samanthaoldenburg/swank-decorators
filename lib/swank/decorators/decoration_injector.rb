@@ -1,56 +1,10 @@
 require "swank/decorators/ivar_dsl"
+require "swank/decorators/decoration_injection"
 require "swank/decorators/decorator_execution_chain"
 
 module Swank
   module Decorators
     class DecorationInjector
-      # Module that actually overrides methods to add injections
-      module DecorationInjection
-        def self.clone_for_scope(scope)
-          dup.tap do |m|
-            m.class_variable_set(:@@swank_decorators, {})
-            deco_source = case scope
-            when :instance then "self.class::SwankDecorations"
-            when :singleton then "self::SwankSingletonDecorations"
-            end
-
-            m.class_eval <<~RUBY, __FILE__, __LINE__ + 1
-              def fetch_decorators(method_name)
-                #{deco_source}.decorators[method_name]
-              end
-
-              def self.decorators
-                @@swank_decorators
-              end
-            RUBY
-          end
-        end
-
-        def run_decorations(method_name, *args, **kwargs, &block)
-          call_sequence = fetch_decorators(method_name)
-
-          invocation = DecoratorExecutionChain.new do |*a, **k|
-            current = call_sequence
-            value = nil
-            # Preserve updates to params, or re-supply them if previous
-            # decorator didn't supply them
-            a.none? ? a = args : args = a
-            k.none? ? k = kwargs : kwargs = k
-
-            if current.nil?
-              value = instance_exec(*a, **k, &block)
-            else
-              call_sequence = call_sequence.nested
-              value = instance_exec(invocation, *a, **k, &current.wrap_block)
-            end
-
-            value
-          end
-
-          instance_exec(&invocation)
-        end
-      end
-
       # Module that intercepts method_adds to inject decorators
       module InjectionHook
         # Inject the added method with all queued instance method decorators
@@ -142,23 +96,11 @@ module Swank
         decorations = @queued_decorations
         @queued_decorations = nil
 
-        decoration_injection_module = fetch_decorator_prepend_module(mode)
+        decoration_injection_module = fetch_decorator_injection_module(
+          decoration_injection_base_module(mode)
+        )
 
-        if decoration_injection_module.decorators[method_name]
-          decoration_injection_module.decorators[method_name].add_to_chain!(decorations)
-        else
-          decoration_injection_module.decorators[method_name] = decorations
-
-          decoration_injection_module.class_eval <<~RUBY, __FILE__, __LINE__ + 1
-            def #{method_name}(*args, **kwargs, &original_method_block)
-              run_decorations(:#{method_name}, *args, **kwargs) do |*a, **k|
-                super(*a, **k, &original_method_block)
-              end
-            end
-          RUBY
-        end
-
-        decorations
+        decoration_injection_module.add_to_decorator_chain!(method_name, decorations)
       end
 
       # Register an entire set of decorators from a module
@@ -174,42 +116,31 @@ module Swank
         end
       end
 
-      # @return [Hash{Symbol => Class<Swank::Decoratos::DecoratorBase>}]
+      # Map of decorator names to decoration defintions
+      # @return [Hash{Symbol => Class<Swank::Decorators::DecoratorBase>}]
       def decorators
         @decorators ||= {}
       end
 
-      # @return [Hash{Symbol => Hash{:instance, :singleton => Module}}]
-      def decoration_injection_modules
-        @decoration_injection_modules ||= {}
-      end
-
       private
 
-      # @param decorator_name [Symbol]
+      def fetch_decorator_injection_module(base_module)
+        subject.const_get(base_module::CONST_NAME)
+      rescue NameError => _
+        base_module.prepend_to(subject)
+      end
+
+      # Get base DecorationInjection module for the given scope
       # @param scope [:instance, :singleton]
-      # @return [Module]
-      def fetch_decorator_prepend_module(scope)
-        modul = decoration_injection_modules[scope]
-
-        return modul if modul
-
-        modul = DecorationInjection.clone_for_scope(scope)
-
-        decoration_injection_modules[scope] = modul
-
+      # @return [DecorationInjection::InstanceLevel] if scope is `:instance`
+      # @return [DecorationInjection::SingletonLevel] if scope is `:singleton`
+      def decoration_injection_base_module(scope)
         case scope
-        when :instance
-          @subject.prepend modul
-          subject.const_set(:SwankDecorations, modul)
-        when :singleton
-          @subject.singleton_class.prepend modul
-          subject.const_set(:SwankSingletonDecorations, modul)
+        when :instance then DecorationInjection::InstanceLevel
+        when :singleton then DecorationInjection::SingletonLevel
         else
           raise ArgumentError, "scope must be :instance or :singleton"
         end
-
-        modul
       end
 
       # Register a type of decorator to {#subject}
@@ -218,7 +149,6 @@ module Swank
       # `subject.singleton_class`
       def register_decorator!(decorator_name, decorator_class)
         decorators[decorator_name] = decorator_class
-        decoration_injection_modules[decorator_name] = {}
       end
 
       def define_decorator_methods!(decorator_name)
