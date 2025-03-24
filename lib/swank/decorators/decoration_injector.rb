@@ -4,6 +4,22 @@ require "swank/decorators/decorator_execution_chain"
 
 module Swank
   module Decorators
+    # A class-level variable that lives in your Class/Module
+    #
+    # It (often via modules it coordinates):
+    #   1. Defines the macros/DSL used to declare declarations,
+    #      via {#define_decorator_methods!}
+    #
+    #   2. Injects the Class/Module with {DecorationInjection::InstanceLevel}
+    #      and {DecorationInjection::SingletonLevel} modules.
+    #
+    #   3. Manages {#queued_decorations} and injects them when a method is added,
+    #      via {MethodAddedHooks}
+    #
+    # An instance of `DecorationInjector` is created a Class/Module first time
+    # the it's passed to the {.bind} method. `.bind` is called whenever a
+    # decorator module is included onto a Class/Module, via
+    # {Swank::Decorators#included}
     class DecorationInjector
       # Module that intercepts method_adds to inject decorators
       module MethodAddedHooks
@@ -90,6 +106,8 @@ module Swank
       end
 
       # Inject the queued decorations into the injector
+      # @param method_name [Symbol] the name of the method we're injecting decorators onto
+      # @param mode [:instance, :singleton]
       def inject_decorations!(method_name, mode:)
         return unless @queued_decorations
 
@@ -104,7 +122,7 @@ module Swank
       end
 
       # Register an entire set of decorators from a module
-      # @param decorators_modules [Module] a module that has extended `Swank::Decorators`
+      # @param decorators_module [Module] a module that has extended `Swank::Decorators`
       def register_decorators!(decorators_module)
         decorators_module.swank_decorators.each do |decorator_name, decorator_class|
           if decorators[decorator_name]
@@ -120,6 +138,39 @@ module Swank
       # @return [Hash{Symbol => Class<Swank::Decorators::DecoratorBase>}]
       def decorators
         @decorators ||= {}
+      end
+
+      # Define the class-level DSL used to declare decorations.
+      #
+      # It:
+      #   1. Defines a `"decorator_name"` class macro that can decorate
+      #      instance methods
+      #   2. Defines a `"decorator_name"_singleton_method` class macro that can
+      #      decorate class-level methods
+      #   3. Creates a class-level instance variable `@"decorator_name"` (see
+      #      {IvarDsl})
+      #
+      # @param decorator_name [Symbol]
+      # @return [void]
+      def define_decorator_methods!(decorator_name)
+        subject.singleton_class.class_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def #{decorator_name}(method_name, ...)
+            injector = class_variable_get(:@@swank_decoration_injector)
+            injector.queue_decoration(:#{decorator_name}, ...)
+            injector.inject_decorations!(method_name, mode: :instance)
+          end
+
+          def #{decorator_name}_singleton_method(method_name, ...)
+            injector = class_variable_get(:@@swank_decoration_injector)
+            injector.queue_decoration(:#{decorator_name}, ...)
+            injector.inject_decorations!(method_name, mode: :singleton)
+          end
+        RUBY
+
+        subject.instance_variable_set(
+          :"@#{decorator_name}",
+          IvarDsl.new(decorator_name, self)
+        )
       end
 
       private
@@ -149,27 +200,6 @@ module Swank
       # `subject.singleton_class`
       def register_decorator!(decorator_name, decorator_class)
         decorators[decorator_name] = decorator_class
-      end
-
-      def define_decorator_methods!(decorator_name)
-        subject.singleton_class.class_eval <<~RUBY, __FILE__, __LINE__ + 1
-          def #{decorator_name}(method_name, ...)
-            injector = class_variable_get(:@@swank_decoration_injector)
-            injector.queue_decoration(:#{decorator_name}, ...)
-            injector.inject_decorations!(method_name, mode: :instance)
-          end
-
-          def #{decorator_name}_singleton_method(method_name, ...)
-            injector = class_variable_get(:@@swank_decoration_injector)
-            injector.queue_decoration(:#{decorator_name}, ...)
-            injector.inject_decorations!(method_name, mode: :singleton)
-          end
-        RUBY
-
-        subject.instance_variable_set(
-          :"@#{decorator_name}",
-          IvarDsl.new(decorator_name, self)
-        )
       end
     end
   end

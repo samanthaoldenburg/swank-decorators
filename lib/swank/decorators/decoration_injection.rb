@@ -4,6 +4,8 @@ module Swank
   module Decorators
     # The module that actually overrides methods to run the decorators
     module DecorationInjection
+      # Behavior shared by {InstanceLevel} and {SingletonLevel}
+      # @api private
       module SharedModuleLevelBehavior
         def clone(*)
           super.tap { |m| m.instance_variable_set(:@decorator_chains, {}) }
@@ -44,6 +46,8 @@ module Swank
         end
       end
 
+      # Behavior prepended by {InstanceLevel} and {SingletonLevel}
+      # @api private
       module SharedPrependedBehavior
         def run_decorations(method_name, *args, **kwargs, &block)
           call_sequence = fetch_swank_decorator_chain(method_name)
@@ -70,6 +74,9 @@ module Swank
         end
       end
 
+      # Instance-level prepended module prototype
+      # @see {DecorationInjection}
+      # @see {DecorationInjection::SharedPrependedBehavior#run_decorations}
       module InstanceLevel
         extend SharedModuleLevelBehavior
         include SharedPrependedBehavior
@@ -89,6 +96,9 @@ module Swank
         end
       end
 
+      # Class-level prepended module prototype
+      # @see {DecorationInjection}
+      # @see {DecorationInjection::SharedPrependedBehavior#run_decorations}
       module SingletonLevel
         extend SharedModuleLevelBehavior
         include SharedPrependedBehavior
