@@ -6,7 +6,7 @@ module Swank
   module Decorators
     class DecorationInjector
       # A proc runs all the decorators for a method
-      class DecoratorChain < Proc
+      class DecoratorExecutionChain < Proc
         # The name of the method we are currently applying decorators to
         def method_name
           binding.local_variable_get(:method_name)
@@ -40,7 +40,7 @@ module Swank
           value = nil
           current = call_sequence
 
-          invocation = DecoratorChain.new do |*a, **k|
+          invocation = DecoratorExecutionChain.new do |*a, **k|
             # Preserve updates to params, or re-supply them if previous
             # decorator didn't supply them
             a.none? ? a = args : args = a
