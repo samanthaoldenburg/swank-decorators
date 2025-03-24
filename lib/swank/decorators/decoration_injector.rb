@@ -5,7 +5,7 @@ module Swank
   module Decorators
     class DecorationInjector
       # Module that actually overrides methods to add injections
-      module DecorationPrepender
+      module DecorationInjection
         def self.clone_for_scope(scope)
           dup.tap do |m|
             m.class_variable_set(:@@swank_decorators, {})
@@ -194,7 +194,7 @@ module Swank
 
         return modul if modul
 
-        modul = DecorationPrepender.clone_for_scope(scope)
+        modul = DecorationInjection.clone_for_scope(scope)
 
         decoration_injection_modules[scope] = modul
 
