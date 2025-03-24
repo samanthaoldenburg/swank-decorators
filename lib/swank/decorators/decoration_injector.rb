@@ -6,7 +6,7 @@ module Swank
   module Decorators
     class DecorationInjector
       # Module that intercepts method_adds to inject decorators
-      module InjectionHook
+      module MethodAddedHooks
         # Inject the added method with all queued instance method decorators
         # @param method_name [Symbol]
         # @return [void]
@@ -38,7 +38,7 @@ module Swank
       # Does the following.
       #   1. Ensures `subject` has a class-level variable `@@swank_decoration_injector`
       #     a. If not, set it to an instance of {DecorationInjector}
-      #   2. Prepend `subject.singleton_class` with {InjectionHook}
+      #   2. Prepend `subject.singleton_class` with {MethodAddedHooks}
       #     a. This intercepts method creation to inject decorators
       #
       # @param subject [Class, Module] a container with methods we can inject
@@ -49,7 +49,7 @@ module Swank
 
         instance = new(subject)
 
-        subject.singleton_class.prepend InjectionHook
+        subject.singleton_class.prepend MethodAddedHooks
         subject.class_variable_set(:@@swank_decoration_injector, instance)
 
         instance
@@ -75,8 +75,8 @@ module Swank
       #
       # @param decorator [Swank::Decorator::DecoratorBase] the decorator
       #
-      # @see {DecorationInjector::InjectionHook#method_added}
-      # @see {DecorationInjector::InjectionHook#singleton_method_added}
+      # @see {DecorationInjector::MethodAddedHooks#method_added}
+      # @see {DecorationInjector::MethodAddedHooks#singleton_method_added}
       def queue_decoration(decorator_name, *args, **kwargs, &block)
         decorator_class = decorators[decorator_name]
         new_decorator = decorator_class.new(*args, **kwargs, &block)
