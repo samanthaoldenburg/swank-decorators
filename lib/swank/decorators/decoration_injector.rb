@@ -28,16 +28,15 @@ module Swank
 
         def run_decorations(method_name, *args, **kwargs, &block)
           call_sequence = fetch_decorators(method_name)
-          value = nil
-          current = call_sequence
 
           invocation = DecoratorExecutionChain.new do |*a, **k|
+            current = call_sequence
+            value = nil
             # Preserve updates to params, or re-supply them if previous
             # decorator didn't supply them
             a.none? ? a = args : args = a
             k.none? ? k = kwargs : kwargs = k
 
-            current = call_sequence
             if current.nil?
               value = instance_exec(*a, **k, &block)
             else
@@ -48,7 +47,7 @@ module Swank
             value
           end
 
-          invocation.call
+          instance_exec(&invocation)
         end
       end
 
