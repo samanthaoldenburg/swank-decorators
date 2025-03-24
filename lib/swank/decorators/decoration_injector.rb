@@ -28,7 +28,7 @@ module Swank
             end
 
             m.class_eval <<~RUBY, __FILE__, __LINE__ + 1
-              def compile_decorators(method_name)
+              def fetch_decorators(method_name)
                 #{deco_source}.decorators[method_name]
               end
 
@@ -40,7 +40,7 @@ module Swank
         end
 
         def run_decorations(method_name, *args, **kwargs, &block)
-          call_sequence = compile_decorators(method_name)
+          call_sequence = fetch_decorators(method_name)
           value = nil
           current = call_sequence
 
