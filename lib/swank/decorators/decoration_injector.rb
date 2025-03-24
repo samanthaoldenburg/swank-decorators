@@ -184,7 +184,7 @@ module Swank
           end
 
           register_decorator!(decorator_name, decorator_class)
-          define_decorator_method!(decorator_name)
+          define_decorator_methods!(decorator_name)
         end
       end
 
@@ -235,7 +235,7 @@ module Swank
         decoration_injection_modules[decorator_name] = {}
       end
 
-      def define_decorator_method!(decorator_name)
+      def define_decorator_methods!(decorator_name)
         subject.singleton_class.class_eval <<~RUBY, __FILE__, __LINE__ + 1
           def #{decorator_name}(method_name, ...)
             injector = class_variable_get(:@@swank_decoration_injector)
