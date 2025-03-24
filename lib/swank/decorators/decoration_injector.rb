@@ -1,18 +1,9 @@
-# lib/decoration_injector.rb
-
 require "swank/decorators/ivar_dsl"
+require "swank/decorators/decorator_execution_chain"
 
 module Swank
   module Decorators
     class DecorationInjector
-      # A proc runs all the decorators for a method
-      class DecoratorExecutionChain < Proc
-        # The name of the method we are currently applying decorators to
-        def method_name
-          binding.local_variable_get(:method_name)
-        end
-      end
-
       # Module that actually overrides methods to add injections
       module DecorationPrepender
         def self.clone_for_scope(scope)
