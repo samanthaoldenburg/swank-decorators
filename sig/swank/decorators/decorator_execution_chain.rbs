@@ -27,7 +27,7 @@ module Swank
       #
       # @return [Symbol]
       #
-      def method_name: () -> untyped
+      def method_name: () -> Symbol
     end
   end
 end

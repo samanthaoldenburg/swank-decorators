@@ -1,105 +1,5 @@
-# <!-- rdoc-file=lib/swank.rb -->
-# Top-level namespace
-#
-# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->
-# lib/decoration_injection.rb
-#
-# <!-- rdoc-file=sig/swank.rbs -->
-# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
-# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
-# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
-#
-# <!-- rdoc-file=sig/swank/decorators.rbs -->
-# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
-# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
-# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
-#
-# <!-- rdoc-file=sig/swank/decorators/decoration_injection.rbs -->
-# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
-# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
-# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
-#
-# <!-- rdoc-file=sig/swank/decorators/decoration_injector.rbs -->
-# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
-# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
-# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
-#
-# <!-- rdoc-file=sig/swank/decorators/decorator_base.rbs -->
-# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
-# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
-# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
-#
-# <!-- rdoc-file=sig/swank/decorators/decorator_execution_chain.rbs -->
-# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
-# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
-# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
-#
-# <!-- rdoc-file=sig/swank/decorators/decorator_with_context.rbs -->
-# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
-# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
-# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
-#
-# <!-- rdoc-file=sig/swank/decorators/decorator_without_context.rbs -->
-# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
-# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
-# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
-#
-# <!-- rdoc-file=sig/swank/decorators/ivar_dsl.rbs -->
-# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
-# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
-# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
-#
-# <!-- rdoc-file=sig/swank/decorators/version.rbs -->
-# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
-# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
-# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
-#
 module Swank
   module Decorators
-    # <!-- rdoc-file=lib/swank/decorators/decoration_injector.rb -->
-    # A class-level variable that lives in your Class/Module
-    #
-    # It (often via modules it coordinates):
-    #     1. Defines the macros/DSL used to declare declarations,
-    #        via {#define_decorator_methods!}
-    #
-    #     2. Injects the Class/Module with {DecorationInjection::InstanceLevel}
-    #        and {DecorationInjection::SingletonLevel} modules.
-    #
-    #     3. Manages {#queued_decorations} and injects them when a method is added,
-    #        via {MethodAddedHooks}
-    #
-    # An instance of `DecorationInjector` is created a Class/Module first time the
-    # it's passed to the {.bind} method. `.bind` is called whenever a decorator
-    # module is included onto a Class/Module, via {Swank::Decorators#included}
-    #
-    # <!-- rdoc-file=sig/swank/decorators/decoration_injector.rbs -->
-    # <!-- rdoc-file=lib/swank/decorators/decoration_injector.rb -->A class-level variable that lives in your Class/Module
-    # It (often via modules it coordinates):
-    #  1. Defines the macros/DSL used to declare declarations,
-    #  via {#define_decorator_methods!}
-    #     2. Injects the Class/Module with {DecorationInjection::InstanceLevel}
-    #        and {DecorationInjection::SingletonLevel} modules.
-    #
-    #     3. Manages {#queued_decorations} and injects them when a method is added,
-    #        via {MethodAddedHooks}
-    #
-    # An instance of `DecorationInjector` is created a Class/Module first time the
-    # it's passed to the {.bind} method. `.bind` is called whenever a decorator
-    # module is included onto a Class/Module, via {Swank::Decorators#included}
-    # <!-- rdoc-file=sig/swank/decorators/decoration_injector.rbs -->A class-level variable that lives in your Class/Module
-    # It (often via modules it coordinates):
-    #  1. Defines the macros/DSL used to declare declarations,
-    #  via {#define_decorator_methods!}
-    # 1. Injects the Class/Module with {DecorationInjection::InstanceLevel}
-    #  and {DecorationInjection::SingletonLevel} modules.
-    # 2. Manages {#queued_decorations} and injects them when a method is added,
-    #  via {MethodAddedHooks}
-    # An instance of `DecorationInjector` is created a Class/Module first time
-    # the it's passed to the {.bind} method. `.bind` is called whenever a
-    # decorator module is included onto a Class/Module, via
-    # {Swank::Decorators#included}
-    #
     class DecorationInjector
       module MethodAddedHooks
         def method_added: (Symbol method_name) -> void
@@ -111,102 +11,22 @@ module Swank
         def decoration_injector: () -> Swank::Decorators::DecorationInjector
       end
 
-      # <!-- rdoc-file=lib/swank/decorators/decoration_injector.rb -->
-      # @param [Class, Module] subject  the method container whose methods will
-      # decorate
-      #
       attr_reader subject: Class | Module
 
-      # <!-- rdoc-file=lib/swank/decorators/decoration_injector.rb -->
-      # Linked-list of queued decorators @return Swank::Decorators::DecoratorChain
-      #
       attr_reader queued_decorations: Swank::Decorators::DecoratorBase
 
-      # <!--
-      #   rdoc-file=lib/swank/decorators/decoration_injector.rb
-      #   - bind(subject)
-      # -->
-      # Set up decoration injection for `subject`
-      #
-      # Does the following.
-      #     1. Ensures +subject+ has a class-level variable +@@swank_decoration_injector+
-      #       a. If not, set it to an instance of {DecorationInjector}
-      #     2. Prepend +subject.singleton_class+ with {MethodAddedHooks}
-      #       a. This intercepts method creation to inject decorators
-      #
-      # @param [Class, Module] subject  a container with methods we can inject
-      #
       def self.bind: (Class | Module subject) -> Swank::Decorators::DecorationInjector
 
-      # <!--
-      #   rdoc-file=lib/swank/decorators/decoration_injector.rb
-      #   - new(subject)
-      # -->
-      # Constructor. @param [Class, Module] subject  the method container whose
-      # methods will decorate
-      #
       def initialize: (Class | Module subject) -> void
 
-      # <!--
-      #   rdoc-file=lib/swank/decorators/decoration_injector.rb
-      #   - queue_decoration(decorator_name, *args, **kwargs, &block)
-      # -->
-      # Add a decorator to the queue
-      #
-      # The next time we add a method, it'll be injected with this decorator and any
-      # others in the queue.
-      #
-      # @param [Swank::Decorator::DecoratorBase] decorator  the decorator
-      #
-      # @see {DecorationInjector::MethodAddedHooks#method_added} @see
-      # {DecorationInjector::MethodAddedHooks#singleton_method_added}
-      #
       def queue_decoration: (Symbol decorator_name, *untyped args, **untyped kwargs) { () -> untyped } -> void
 
-      # <!--
-      #   rdoc-file=lib/swank/decorators/decoration_injector.rb
-      #   - inject_decorations!(method_name, mode:)
-      # -->
-      # Inject the queued decorations into the injector @param [Symbol] method_name
-      # the name of the method we're injecting decorators onto @param [:instance,
-      # :singleton] mode
-      #
       def inject_decorations!: (Symbol method_name, mode: :instance | :singleton) -> void
 
-      # <!--
-      #   rdoc-file=lib/swank/decorators/decoration_injector.rb
-      #   - register_decorators!(decorators_module)
-      # -->
-      # Register an entire set of decorators from a module @param [Module]
-      # decorators_module  a module that has extended `Swank::Decorators`
-      #
       def register_decorators!: (Module decorators_module) -> void
 
-      # <!--
-      #   rdoc-file=lib/swank/decorators/decoration_injector.rb
-      #   - decorators()
-      # -->
-      # Map of decorator names to decoration defintions @return [Hash{Symbol =>
-      # Class<Swank::Decorators::DecoratorBase>}]
-      #
       def decorators: () -> Hash[Symbol, Class[Swank::Decorators::DecoratorBase]]
 
-      # <!--
-      #   rdoc-file=lib/swank/decorators/decoration_injector.rb
-      #   - define_decorator_methods!(decorator_name)
-      # -->
-      # Define the class-level DSL used to declare decorations.
-      #
-      # It:
-      #     1. Defines a +"decorator_name"+ class macro that can decorate
-      #        instance methods
-      #     2. Defines a +"decorator_name"_singleton_method+ class macro that can
-      #        decorate class-level methods
-      #     3. Creates a class-level instance variable +@"decorator_name"+ (see
-      #        {IvarDsl})
-      #
-      # @param [Symbol] decorator_name @return [void]
-      #
       def define_decorator_methods!: (Symbol decorator_name) -> void
 
       private

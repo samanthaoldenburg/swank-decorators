@@ -1,27 +1,7 @@
-# <!-- rdoc-file=lib/swank.rb -->
-# Top-level namespace
-#
-# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->
-# lib/decoration_injection.rb
-#
-# <!-- rdoc-file=sig/swank.rbs -->
-# Top-level namespace
-#
 module Swank
   module Decorators
-    # <!-- rdoc-file=lib/swank/decorators/decorator_without_context.rb -->
-    # A simple decorator that can be invoked without variables
-    #
-    # <!-- rdoc-file=sig/swank/decorators/decorator_without_context.rbs -->
-    # A simple decorator that can be invoked without variables
-    #
     class DecoratorWithoutContext < DecoratorBase
-      # <!--
-      #   rdoc-file=lib/swank/decorators/decorator_without_context.rb
-      #   - wrap_block()
-      # -->
-      #
-      def wrap_block: () -> untyped
+      def wrap_block: () -> Proc
     end
   end
 end
