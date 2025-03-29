@@ -4,11 +4,11 @@ module Swank
 
     def def_decorator: (Symbol name) {
       (Proc func, *untyped args, **untyped kwargs) -> untyped
-    } -> Class[Swank::Decorators::DecoratorWithoutContext]
+    } -> singleton(Swank::Decorators::DecoratorWithoutContext)
 
     def def_decorator_factory: (Symbol name) {
       (*untyped args, **untyped kwargs) -> Proc
-    } -> Class[Swank::Decorators::DecoratorWithoutContext]
+    } -> singleton(Swank::Decorators::DecoratorWithContext)
 
     def swank_decorators: () -> untyped
 

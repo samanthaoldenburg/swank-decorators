@@ -1,9 +1,9 @@
 module Swank
   module Decorators
     class DecoratorWithContext < DecoratorBase
-      @args: Array
+      @args: Array[untyped]
 
-      @kwargs: Hash
+      @kwargs: Hash[Symbol, untyped]
 
       @block: Proc | nil
 
@@ -17,13 +17,13 @@ module Swank
 
       def self.initialize_variable_set_string: () -> String
 
-      attr_reader args: Array
+      attr_reader args: Array[untyped]
       
-      attr_reader kwargs: Hash
+      attr_reader kwargs: Hash[Symbol, untyped]
 
       attr_reader block: Proc | nil
 
-      def initialize: (*untyped args, **untyped kwargs) { () -> untyped } -> void
+      def initialize: (*untyped args, **untyped kwargs) ?{ () -> untyped } -> void
 
       def wrap_block: () -> Proc
     end

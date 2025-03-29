@@ -33,6 +33,10 @@ module Swank
       # @return [DecoratorBase]
       attr_reader :nested
 
+      def initialize(*)
+        # Do nothing
+      end
+
       def add_to_chain!(decorator)
         @nested ? nested.add_to_chain!(decorator) : @nested = decorator
       end

@@ -13,14 +13,16 @@ module Swank
 
       module SharedPrependedBehavior
         def run_decorations: (Symbol method_name, *untyped args, **untyped kwargs) { () -> untyped } -> untyped
+
+        def fetch_swank_decorator_chain: (Symbol method_name) -> Swank::Decorators::DecoratorBase
       end
+
       module InstanceLevel
         extend SharedModuleLevelBehavior
 
         include SharedPrependedBehavior
 
-        # The name of this module should have when working with +const_set+
-        CONST_NAME: :SwankDecorationInjection
+        def self.const_name: () -> Symbol
 
         def self.prepend_to: (Class | Module obj) -> void
 
@@ -32,7 +34,7 @@ module Swank
 
         include SharedPrependedBehavior
 
-        CONST_NAME: :SwankSingletonDecorationInjection
+        def self.const_name: () -> Symbol
 
         def self.prepend_to: (Class | Module obj) -> untyped
 

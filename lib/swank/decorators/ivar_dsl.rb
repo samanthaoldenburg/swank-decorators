@@ -50,6 +50,7 @@ module Swank
       #       SecureRandom.uuid
       #     end
       #   end
+      #
       def call(...)
         injector.queue_decoration(decorator_name, ...)
       end
@@ -116,8 +117,8 @@ module Swank
       #       select(:role).uniq.map(&:to_sym)
       #     end
       #   end
-      def +@(...)
-        injector.queue_decoration(decorator_name, ...)
+      def +@
+        injector.queue_decoration(decorator_name)
       end
       alias_method :!, :+@
 

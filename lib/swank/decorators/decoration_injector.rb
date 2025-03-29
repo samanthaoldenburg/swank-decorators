@@ -45,6 +45,7 @@ module Swank
 
         # @return [Swank::Decorators::DecorationInjector]
         def decoration_injector
+          # @type self: Class | Module
           class_variable_get(:@@swank_decoration_injector)
         end
       end
@@ -95,8 +96,12 @@ module Swank
       # @see {DecorationInjector::MethodAddedHooks#method_added}
       # @see {DecorationInjector::MethodAddedHooks#singleton_method_added}
       def queue_decoration(decorator_name, *args, **kwargs, &block)
-        decorator_class = decorators[decorator_name]
-        new_decorator = decorator_class.new(*args, **kwargs, &block)
+        decorator_klass = decorators[decorator_name] 
+        new_decorator = decorator_klass.new( # steep:ignore UnexpectedBlockGiven
+          *args, # steep:ignore UnexpectedPositionalArgument
+          **kwargs,
+          &block 
+        ) 
         if @queued_decorations.nil?
           @queued_decorations = new_decorator
         else
@@ -127,7 +132,7 @@ module Swank
       def register_decorators!(decorators_module)
         decorators_module.swank_decorators.each do |decorator_name, decorator_class|
           if decorators[decorator_name]
-            warn "Decorator #{decoration_name} already defined for #{subject}"
+            warn "Decorator #{decorator_name} already defined for #{subject}"
           end
 
           register_decorator!(decorator_name, decorator_class)
@@ -182,7 +187,7 @@ module Swank
       #   {DecorationInjection::SingletonLevel}
       # @return [Module]
       def fetch_decorator_injection_module(base_module)
-        subject.const_get(base_module::CONST_NAME)
+        subject.const_get(base_module.const_name)
       rescue NameError => _
         base_module.prepend_to(subject)
       end

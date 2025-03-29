@@ -15,11 +15,11 @@ module Swank
 
       def []: (*untyped) ?{ (*untyped, **untyped) -> untyped } -> Swank::Decorators::DecoratorBase
 
-      def +@: () -> Swank::Decorators::DecoratorWithoutContext
+      def +@: () -> Swank::Decorators::DecoratorBase
 
       alias ! +@
 
-      def >>: (untyped other) -> Swank::Decorators::DecoratorWithContext
+      def >>: (untyped other) -> Swank::Decorators::DecoratorBase
 
       alias >= >>
     end

@@ -19,23 +19,27 @@ module Swank
 
       def initialize: (Class | Module subject) -> void
 
-      def queue_decoration: (Symbol decorator_name, *untyped args, **untyped kwargs) { () -> untyped } -> void
+      def queue_decoration: (Symbol decorator_name, *untyped args, **untyped kwargs) ?{ () -> untyped } -> Swank::Decorators::DecoratorBase
 
-      def inject_decorations!: (Symbol method_name, mode: :instance | :singleton) -> void
+      def inject_decorations!: (Symbol method_name, mode: Symbol) -> void
 
-      def register_decorators!: (Module decorators_module) -> void
+      def register_decorators!: (Swank::Decorators decorators_module) -> void
 
-      def decorators: () -> Hash[Symbol, Class[Swank::Decorators::DecoratorBase]]
+      def decorators: () -> Hash[Symbol, Class]
 
       def define_decorator_methods!: (Symbol decorator_name) -> void
 
       private
 
-      def fetch_decorator_injection_module: (Module base_module) -> Module
+      type decoration_injection_base_module_type = singleton(Swank::Decorators::DecorationInjection::InstanceLevel) | singleton(Swank::Decorators::DecorationInjection::SingletonLevel)
 
-      def decoration_injection_base_module: (:instance | :singleton scope) -> Module
+      def fetch_decorator_injection_module: (
+        decoration_injection_base_module_type base_module
+      ) -> singleton(Swank::Decorators::DecorationInjection::InstanceLevel)
 
-      def register_decorator!: (Symbol decorator_name, Class[Swank::Decorators::DecoratorBase] decorator_class) -> void
+      def decoration_injection_base_module: (Symbol scope) -> decoration_injection_base_module_type 
+
+      def register_decorator!: (Symbol decorator_name, singleton(Swank::Decorators::DecoratorBase) decorator_class) -> void
     end
   end
 end

@@ -33,9 +33,9 @@ module Swank
             when :key then "#{param_name}: #{NOTHING_STRING}"
             when :block then "&#{param_name}"
             when :rest
-              (param_name.to_sym == :*) ? "*" : "*#{param_name}"
+              (param_name == :*) ? "*" : "*#{param_name}"
             when :keyrest
-              (param_name.to_sym == :**) ? "**" : "**#{param_name}"
+              (param_name == :**) ? "**" : "**#{param_name}"
             else
               raise ArgumentError, "Bad param_type for #{param_name} - #{param_type}"
             end
@@ -43,33 +43,33 @@ module Swank
         end
 
         def initialize_variable_set_string
-          variables = {args: [], kwargs: [], block: "nil"}
+          args = [] #: Array[String]
+          kwargs = [] #: Array[String]
+          block = "nil"
+
           wrap_block.parameters.each do |param_type, param_name|
             case param_type
-            when :req, :opt then variables[:args] << param_name
-            when :keyreq, :key then variables[:kwargs] << "#{param_name}: #{param_name}"
-            when :block then variables[:block] = param_name
+            when :req, :opt
+              unless param_name.nil?
+                args << param_name # @type var param_name: ::String
+              end
+            when :keyreq, :key then kwargs << "#{param_name}: #{param_name}"
+            when :block then block = param_name
             when :rest
-              variables[:kwargs] << if param_name.to_sym == :*
-                "*"
-              else
-                "*#{param_name}"
-              end
+              arg_name = (param_name == :*) ? "*" : "*#{param_name}"
+              args << arg_name
             when :keyrest
-              variables[:kwargs] << if param_name.to_sym == :**
-                "*"
-              else
-                "**#{param_name}"
-              end
+              arg_name = (param_name == :**) ? "**" : "**#{param_name}"
+              kwargs << arg_name
             else
               raise ArgumentError, "Bad param_type for #{param_name} - #{param_type}"
             end
           end
 
           [
-            "  @args = [#{variables[:args].join(", ")}]",
-            "  @kwargs = {#{variables[:kwargs].join(", ")}}",
-            "  @block = #{variables[:block]}",
+            "  @args = [#{args.join(", ")}]",
+            "  @kwargs = {#{kwargs.join(", ")}}",
+            "  @block = #{block}",
             "  @args.reject! { |v| v.equal? #{NOTHING_STRING} }",
             "  @kwargs.delete_if { |_, v| v.equal? #{NOTHING_STRING} }"
           ].join("\n")
