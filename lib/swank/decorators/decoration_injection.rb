@@ -54,7 +54,6 @@ module Swank
       # Behavior prepended by {InstanceLevel} and {SingletonLevel}
       # @api private
       module SharedPrependedBehavior
-
         # Wrap the method with its assigned decorations and run it
         #
         # @param [Object] args the positional arguments passed to the method

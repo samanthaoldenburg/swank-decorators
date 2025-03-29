@@ -96,12 +96,12 @@ module Swank
       # @see {DecorationInjector::MethodAddedHooks#method_added}
       # @see {DecorationInjector::MethodAddedHooks#singleton_method_added}
       def queue_decoration(decorator_name, *args, **kwargs, &block)
-        decorator_klass = decorators[decorator_name] 
+        decorator_klass = decorators[decorator_name]
         new_decorator = decorator_klass.new( # steep:ignore UnexpectedBlockGiven
           *args, # steep:ignore UnexpectedPositionalArgument
           **kwargs,
-          &block 
-        ) 
+          &block
+        )
         if @queued_decorations.nil?
           @queued_decorations = new_decorator
         else

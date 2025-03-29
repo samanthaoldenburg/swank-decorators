@@ -43,8 +43,8 @@ module Swank
         end
 
         def initialize_variable_set_string
-          args = [] #: Array[String]
-          kwargs = [] #: Array[String]
+          args = [] # : Array[String]
+          kwargs = [] # : Array[String]
           block = "nil"
 
           wrap_block.parameters.each do |param_type, param_name|

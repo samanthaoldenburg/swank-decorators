@@ -1,5 +1,5 @@
- target :lib do
-   signature "sig"
+target :lib do
+  signature "sig"
 
-   check "lib"
- end
+  check "lib"
+end
