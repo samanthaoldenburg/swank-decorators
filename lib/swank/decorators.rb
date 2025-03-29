@@ -6,6 +6,9 @@ require "swank/decorators/decorator_without_context"
 require "swank/decorators/decorator_with_context"
 
 module Swank
+  # A module you can extend to define decorators.
+  #
+  # For examples, see {#def_decorator} and {#def_decorator_factory}
   module Decorators
     # Define a basic decorator
     # @param name [Symbol] the name of the decorator

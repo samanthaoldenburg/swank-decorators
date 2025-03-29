@@ -1,0 +1,14 @@
+# <!-- rdoc-file=lib/swank.rb -->
+# Top-level namespace
+#
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->
+# lib/decoration_injection.rb
+#
+# <!-- rdoc-file=sig/swank.rbs -->
+# Top-level namespace
+#
+module Swank
+  module Decorators
+    VERSION: "0.1.0"
+  end
+end

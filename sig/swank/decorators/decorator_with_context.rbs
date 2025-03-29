@@ -1,0 +1,89 @@
+# <!-- rdoc-file=lib/swank.rb -->
+# Top-level namespace
+#
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->
+# lib/decoration_injection.rb
+#
+# <!-- rdoc-file=sig/swank.rbs -->
+# Top-level namespace
+#
+module Swank
+  module Decorators
+    # <!-- rdoc-file=lib/swank/decorators/decorator_with_context.rb -->
+    # Simple decorator that takes variables when declared
+    #
+    # <!-- rdoc-file=sig/swank/decorators/decorator_with_context.rbs -->
+    # Simple decorator that takes variables when declared
+    #
+    class DecoratorWithContext < DecoratorBase
+      @args: untyped
+
+      @kwargs: untyped
+
+      @block: untyped
+
+      # <!-- rdoc-file=lib/swank/decorators/decorator_with_context.rb -->
+      # Create a custom null object that can be overriden by defaults
+      #
+      NOTHING: untyped
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/decorator_with_context.rb
+      #   - setup(decorator_name, wrap_block)
+      # -->
+      #
+      def self.setup: (untyped decorator_name, untyped wrap_block) -> untyped
+
+      # <!-- rdoc-file=lib/swank/decorators/decorator_with_context.rb -->
+      # String representation of of {DecoratorWithContext::NOTHING}.
+      #
+      # Used by {.initialize_parameter_string}
+      #
+      NOTHING_STRING: "::Swank::Decorators::DecoratorWithContext::NOTHING"
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/decorator_with_context.rb
+      #   - initialize_parameter_string()
+      # -->
+      # @api private
+      #
+      def self.initialize_parameter_string: () -> untyped
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/decorator_with_context.rb
+      #   - initialize_variable_set_string()
+      # -->
+      #
+      def self.initialize_variable_set_string: () -> untyped
+
+      # <!-- rdoc-file=lib/swank/decorators/decorator_with_context.rb -->
+      # List of positional arguments given @return [Array]
+      #
+      attr_reader args: untyped
+
+      # <!-- rdoc-file=lib/swank/decorators/decorator_with_context.rb -->
+      # List of keyword arguments given @return [Hash]
+      #
+      attr_reader kwargs: untyped
+
+      # <!-- rdoc-file=lib/swank/decorators/decorator_with_context.rb -->
+      # The block argument, if given @return [Proc, nil]
+      #
+      attr_reader block: untyped
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/decorator_with_context.rb
+      #   - new(*args, **kwargs, &block)
+      # -->
+      #
+      def initialize: (*untyped args, **untyped kwargs) { () -> untyped } -> void
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/decorator_with_context.rb
+      #   - wrap_block()
+      # -->
+      #
+      def wrap_block: () -> untyped
+    end
+  end
+end

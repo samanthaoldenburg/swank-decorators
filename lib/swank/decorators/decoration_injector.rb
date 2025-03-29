@@ -16,15 +16,15 @@ module Swank
     #   3. Manages {#queued_decorations} and injects them when a method is added,
     #      via {MethodAddedHooks}
     #
-    # An instance of `DecorationInjector` is created a Class/Module first time
-    # the it's passed to the {.bind} method. `.bind` is called whenever a
+    # An instance of +DecorationInjector+ is created a Class/Module first time
+    # the it's passed to the {.bind} method. +.bind+ is called whenever a
     # decorator module is included onto a Class/Module, via
     # {Swank::Decorators#included}
     class DecorationInjector
       # Module that intercepts method_adds to inject decorators
       module MethodAddedHooks
         # Inject the added method with all queued instance method decorators
-        # @param method_name [Symbol]
+        # @param [Symbol] method_name
         # @return [void]
         def method_added(method_name)
           decoration_injector.inject_decorations!(method_name.to_sym, mode: :instance)
@@ -33,7 +33,7 @@ module Swank
         end
 
         # Inject the added method with all queued singleton method decorators
-        # @param method_name [Symbol]
+        # @param [Symbol] method_name
         # @return [void]
         def singleton_method_added(method_name)
           decoration_injector.inject_decorations!(method_name.to_sym, mode: :singleton)
@@ -49,15 +49,15 @@ module Swank
         end
       end
 
-      # Set up decoration injection for `subject`
+      # Set up decoration injection for +subject+
       #
       # Does the following.
-      #   1. Ensures `subject` has a class-level variable `@@swank_decoration_injector`
+      #   1. Ensures +subject+ has a class-level variable +@@swank_decoration_injector+
       #     a. If not, set it to an instance of {DecorationInjector}
-      #   2. Prepend `subject.singleton_class` with {MethodAddedHooks}
+      #   2. Prepend +subject.singleton_class+ with {MethodAddedHooks}
       #     a. This intercepts method creation to inject decorators
       #
-      # @param subject [Class, Module] a container with methods we can inject
+      # @param [Class, Module] subject  a container with methods we can inject
       def self.bind(subject)
         if subject.class_variables.include? :@@swank_decoration_injector
           return subject.class_variable_get(:@@swank_decoration_injector)
@@ -71,14 +71,15 @@ module Swank
         instance
       end
 
-      # @return [Array<Swank::Decorators::MethodDecorator::Decoration>]
+      # Linked-list of queued decorators
+      # @return Swank::Decorators::DecoratorChain
       attr_reader :queued_decorations
 
-      # @param subject [Class, Module] the method container whose methods will decorate
+      # @param [Class, Module] subject  the method container whose methods will decorate
       attr_reader :subject
 
       # Constructor.
-      # @param subject [Class, Module] the method container whose methods will decorate
+      # @param [Class, Module] subject  the method container whose methods will decorate
       def initialize(subject)
         @subject = subject
         @queued_decorations = nil
@@ -89,7 +90,7 @@ module Swank
       # The next time we add a method, it'll be injected with this decorator and
       # any others in the queue.
       #
-      # @param decorator [Swank::Decorator::DecoratorBase] the decorator
+      # @param [Swank::Decorator::DecoratorBase] decorator  the decorator
       #
       # @see {DecorationInjector::MethodAddedHooks#method_added}
       # @see {DecorationInjector::MethodAddedHooks#singleton_method_added}
@@ -106,8 +107,8 @@ module Swank
       end
 
       # Inject the queued decorations into the injector
-      # @param method_name [Symbol] the name of the method we're injecting decorators onto
-      # @param mode [:instance, :singleton]
+      # @param [Symbol] method_name  the name of the method we're injecting decorators onto
+      # @param [:instance, :singleton] mode
       def inject_decorations!(method_name, mode:)
         return unless @queued_decorations
 
@@ -122,7 +123,7 @@ module Swank
       end
 
       # Register an entire set of decorators from a module
-      # @param decorators_module [Module] a module that has extended `Swank::Decorators`
+      # @param [Module] decorators_module  a module that has extended +Swank::Decorators+
       def register_decorators!(decorators_module)
         decorators_module.swank_decorators.each do |decorator_name, decorator_class|
           if decorators[decorator_name]
@@ -143,14 +144,14 @@ module Swank
       # Define the class-level DSL used to declare decorations.
       #
       # It:
-      #   1. Defines a `"decorator_name"` class macro that can decorate
+      #   1. Defines a +"decorator_name"+ class macro that can decorate
       #      instance methods
-      #   2. Defines a `"decorator_name"_singleton_method` class macro that can
+      #   2. Defines a +"decorator_name"_singleton_method+ class macro that can
       #      decorate class-level methods
-      #   3. Creates a class-level instance variable `@"decorator_name"` (see
+      #   3. Creates a class-level instance variable +@"decorator_name"+ (see
       #      {IvarDsl})
       #
-      # @param decorator_name [Symbol]
+      # @param [Symbol] decorator_name
       # @return [void]
       def define_decorator_methods!(decorator_name)
         subject.singleton_class.class_eval <<~RUBY, __FILE__, __LINE__ + 1
@@ -175,6 +176,11 @@ module Swank
 
       private
 
+      # Get the DecorationInjection module prepended to subject.
+      #
+      # @base_module [Module] should be {DecorationInjection::InstanceLevel} or
+      #   {DecorationInjection::SingletonLevel}
+      # @return [Module]
       def fetch_decorator_injection_module(base_module)
         subject.const_get(base_module::CONST_NAME)
       rescue NameError => _
@@ -182,9 +188,9 @@ module Swank
       end
 
       # Get base DecorationInjection module for the given scope
-      # @param scope [:instance, :singleton]
-      # @return [DecorationInjection::InstanceLevel] if scope is `:instance`
-      # @return [DecorationInjection::SingletonLevel] if scope is `:singleton`
+      # @param [:instance, :singleton] scope
+      # @return [DecorationInjection::InstanceLevel] if scope is +:instance+
+      # @return [DecorationInjection::SingletonLevel] if scope is +:singleton+
       def decoration_injection_base_module(scope)
         case scope
         when :instance then DecorationInjection::InstanceLevel
@@ -197,7 +203,7 @@ module Swank
       # Register a type of decorator to {#subject}
       #
       # This involves creating modules that prepend {#subject} and
-      # `subject.singleton_class`
+      # +subject.singleton_class+
       def register_decorator!(decorator_name, decorator_class)
         decorators[decorator_name] = decorator_class
       end

@@ -1,0 +1,118 @@
+# <!-- rdoc-file=lib/swank.rb -->
+# Top-level namespace
+#
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->
+# lib/decoration_injection.rb
+#
+# <!-- rdoc-file=sig/swank.rbs -->
+# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
+# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
+#
+# <!-- rdoc-file=sig/swank/decorators.rbs -->
+# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
+# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
+#
+# <!-- rdoc-file=sig/swank/decorators/decoration_injection.rbs -->
+# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
+# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
+#
+# <!-- rdoc-file=sig/swank/decorators/decoration_injector.rbs -->
+# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
+# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
+#
+# <!-- rdoc-file=sig/swank/decorators/decorator_base.rbs -->
+# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
+# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
+#
+# <!-- rdoc-file=sig/swank/decorators/decorator_execution_chain.rbs -->
+# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
+# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
+#
+# <!-- rdoc-file=sig/swank/decorators/decorator_with_context.rbs -->
+# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
+# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
+#
+# <!-- rdoc-file=sig/swank/decorators/decorator_without_context.rbs -->
+# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
+# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
+#
+# <!-- rdoc-file=sig/swank/decorators/ivar_dsl.rbs -->
+# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
+# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
+#
+# <!-- rdoc-file=sig/swank/decorators/version.rbs -->
+# <!-- rdoc-file=lib/swank.rb -->Top-level namespace
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->lib/decoration_injection.rb
+# <!-- rdoc-file=sig/swank.rbs -->Top-level namespace
+#
+module Swank
+  module Decorators
+    module DecorationInjection
+      module SharedModuleLevelBehavior
+        def clone: (*untyped) -> Module
+
+        def decorator_chains: () -> Hash[Symbol, Swank::Decorators::DecoratorBase]
+
+        def add_to_decorator_chain!: (Symbol method_name, Swank::Decorators::DecoratorBase decorator_chain) -> void
+
+        def create_decoration_method!: (Symbol method_name) -> void
+      end
+
+      module SharedPrependedBehavior
+        def run_decorations: (Symbol method_name, *untyped args, **untyped kwargs) { () -> untyped } -> untyped
+      end
+
+      # Instance-level prepended module prototype
+      # @see {DecorationInjection}
+      # @see {DecorationInjection::SharedPrependedBehavior#run_decorations}
+      module InstanceLevel
+        extend SharedModuleLevelBehavior
+
+        include SharedPrependedBehavior
+
+        # The name of this module should have when working with +const_set+
+        CONST_NAME: :SwankDecorationInjection
+
+        def self.prepend_to: (Class | Module obj) -> void
+
+        # Fetch the linked-list of decorators for the given method instance
+        # method
+        #
+        # @param [Symbol] method_name
+        # @return [DecoratorBase]
+        def fetch_swank_decorator_chain: (Symbol method_name) -> Swank::Decorators::DecoratorBase
+      end
+
+      # Class-level prepended module prototype
+      # @see {DecorationInjection}
+      # @see {DecorationInjection::SharedPrependedBehavior#run_decorations}
+      module SingletonLevel
+        extend SharedModuleLevelBehavior
+
+        include SharedPrependedBehavior
+
+        # The name of this module should have when working with +const_set+
+        CONST_NAME: :SwankSingletonDecorationInjection
+
+        # Prepend this module to the singleton class
+        def self.prepend_to: (Class | Module obj) -> untyped
+
+        # Fetch the linked-list of decorators for the given method singleton
+        # method
+        #
+        # @param [Symbol] method_name
+        # @return [DecoratorBase]
+        def fetch_swank_decorator_chain: (Symbol method_name) -> Swank::Decorators::DecoratorBase
+      end
+    end
+  end
+end

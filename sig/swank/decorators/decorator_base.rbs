@@ -1,0 +1,80 @@
+# <!-- rdoc-file=lib/swank.rb -->
+# Top-level namespace
+#
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->
+# lib/decoration_injection.rb
+#
+# <!-- rdoc-file=sig/swank.rbs -->
+# Top-level namespace
+#
+module Swank
+  module Decorators
+    # <!-- rdoc-file=lib/swank/decorators/decorator_base.rb -->
+    # Abstract class for actual decorations @abstract
+    #
+    # <!-- rdoc-file=sig/swank/decorators/decorator_base.rbs -->
+    # Abstract class for actual decorations
+    # @abstract
+    #
+    class DecoratorBase
+      self.@decorator_name: untyped
+
+      self.@wrap_block: untyped
+
+      @nested: untyped
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/decorator_base.rb
+      #   - setup(decorator_name, wrap_block)
+      # -->
+      # Setup a decorator, defining its name an implemenation
+      #
+      def self.setup: (untyped decorator_name, untyped wrap_block) -> untyped
+
+      # <!-- rdoc-file=lib/swank/decorators/decorator_base.rb -->
+      # Name of the decorator @return [Symbol]
+      #
+      attr_reader self.decorator_name: untyped
+
+      # <!-- rdoc-file=lib/swank/decorators/decorator_base.rb -->
+      # Implementation of the decorator @return [Proc]
+      #
+      attr_reader self.wrap_block: untyped
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/decorator_base.rb
+      #   - decorator_name()
+      # -->
+      # (see .decorator_name)
+      #
+      def decorator_name: () -> untyped
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/decorator_base.rb
+      #   - wrap_block()
+      # -->
+      # @return [Proc] @abstract
+      #
+      def wrap_block: () -> untyped
+
+      # <!-- rdoc-file=lib/swank/decorators/decorator_base.rb -->
+      # @return [DecoratorBase]
+      #
+      attr_reader nested: untyped
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/decorator_base.rb
+      #   - add_to_chain!(decorator)
+      # -->
+      #
+      def add_to_chain!: (untyped decorator) -> untyped
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/decorator_base.rb
+      #   - final?()
+      # -->
+      #
+      def final?: () -> untyped
+    end
+  end
+end

@@ -1,0 +1,210 @@
+# <!-- rdoc-file=lib/swank.rb -->
+# Top-level namespace
+#
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->
+# lib/decoration_injection.rb
+#
+# <!-- rdoc-file=sig/swank.rbs -->
+# Top-level namespace
+#
+module Swank
+  module Decorators
+    # <!-- rdoc-file=lib/swank/decorators/ivar_dsl.rb -->
+    # Helper class to enable ivar DSL
+    #
+    # <!-- rdoc-file=sig/swank/decorators/ivar_dsl.rbs -->
+    # Helper class to enable ivar DSL
+    #
+    class IvarDsl
+      @decorator_name: untyped
+
+      @injector: untyped
+
+      # <!-- rdoc-file=lib/swank/decorators/ivar_dsl.rb -->
+      # Name of the decorator represented by this Ivar @return [Symbol]
+      #
+      attr_reader decorator_name: untyped
+
+      # <!-- rdoc-file=lib/swank/decorators/ivar_dsl.rb -->
+      # The injector class that created this DSL helper @return
+      # [Swank::Decorators::DecorationInjector]
+      #
+      attr_reader injector: untyped
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/ivar_dsl.rb
+      #   - new(decorator_name, injector)
+      # -->
+      # @param injector [Swank::Decorators::DecorationInjector]
+      #
+      def initialize: (untyped decorator_name, untyped injector) -> void
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/ivar_dsl.rb
+      #   - call(...)
+      # -->
+      # Syntactic-sugar useful for a {DecoratorWithContext}
+      #
+      # @example
+      #     module ThreadDecorators
+      #       extend Swank::Decorators
+      #
+      #       # Decorate the method to run in a Thread
+      #       def_decorator :async do |*args, **kwargs, &block|
+      #         Thread.new { super(*args, **kwargs, &block) }
+      #       end
+      #
+      #       # Decorate the method to memoize in a Thread-local variable
+      #       #
+      #       # @example
+      #       #   class SessionHelper
+      #       #     include ThreadDecorators
+      #       #
+      #       #     # @return [String] a UUID
+      #       def_decorator_factory :thread_local_cache do |var_name|
+      #         ->(*args, **kwargs, &block) {
+      #           Thread.current[var_name] ||= super(*args, **kwargs, &block)
+      #         }
+      #       end
+      #     end
+      #
+      #     class SessionHelper
+      #       extend ConstStaticMethod
+      #
+      #       # @return [String] UUID
+      #       @thread_local_cache.(:session_uuid)
+      #       def self.session_uuid
+      #         SecureRandom.uuid
+      #       end
+      #     end
+      #
+      def call: (*untyped) ?{ () -> untyped } -> untyped
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/ivar_dsl.rb
+      #   - [](...)
+      # -->
+      # Syntactic-sugar useful for a {DecoratorWithContext}
+      #
+      # @example
+      #     module ThreadDecorators
+      #       extend Swank::Decorators
+      #
+      #       # Decorate the method to run in a Thread
+      #       def_decorator :async do |*args, **kwargs, &block|
+      #         Thread.new { super(*args, **kwargs, &block) }
+      #       end
+      #
+      #       # Decorate the method to memoize in a Thread-local variable
+      #       #
+      #       # @example
+      #       #   class SessionHelper
+      #       #     include ThreadDecorators
+      #       #
+      #       #     # @return [String] a UUID
+      #       def_decorator_factory :thread_local_cache do |var_name|
+      #         ->(*args, **kwargs, &block) {
+      #           Thread.current[var_name] ||= super(*args, **kwargs, &block)
+      #         }
+      #       end
+      #     end
+      #
+      #     class SessionHelper
+      #       extend ConstStaticMethod
+      #
+      #       # @return [String] UUID
+      #       @thread_local_cache[:session_uuid]
+      #       def self.session_uuid
+      #         SecureRandom.uuid
+      #       end
+      #     end
+      #
+      def []: (*untyped) ?{ () -> untyped } -> untyped
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/ivar_dsl.rb
+      #   - +@(...)
+      # -->
+      # Syntactic-sugar useful for a {DecoratorWithoutContext} @example
+      #     module ConstStaticMethods
+      #       extend Swank::Decorations
+      #
+      #       def_decorator_factory :const_static do |*args, **kwargs, &block|
+      #         const_name = "CONST_STATIC_#{__method__}"
+      #
+      #         const_get(const_name)
+      #       rescue NameError => e
+      #         super(*args, **kwargs, &block).tap { |result| const_set(const_name, result) }
+      #       end
+      #     end
+      #
+      #     class User < ApplicationRecord
+      #       extend ConstStaticMethod
+      #
+      #       # Get a list of all roles in the user database
+      #       # @return [Array<Symbol>]
+      #       !@const_static
+      #       def self.all_user_roles
+      #         select(:role).uniq.map(&:to_sym)
+      #       end
+      #     end
+      #
+      def +@: (*untyped) ?{ () -> untyped } -> untyped
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/ivar_dsl.rb
+      #   - !(...)
+      # -->
+      #
+      alias ! +@
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/ivar_dsl.rb
+      #   - >>(other)
+      # -->
+      # Syntactic-sugar useful for a {DecoratorWithContext}
+      #
+      # @example
+      #     module ThreadDecorators
+      #       extend Swank::Decorators
+      #
+      #       # Decorate the method to run in a Thread
+      #       def_decorator :async do |*args, **kwargs, &block|
+      #         Thread.new { super(*args, **kwargs, &block) }
+      #       end
+      #
+      #       # Decorate the method to memoize in a Thread-local variable
+      #       #
+      #       # @example
+      #       #   class SessionHelper
+      #       #     include ThreadDecorators
+      #       #
+      #       #     # @return [String] a UUID
+      #       def_decorator_factory :thread_local_cache do |var_name|
+      #         ->(*args, **kwargs, &block) {
+      #           Thread.current[var_name] ||= super(*args, **kwargs, &block)
+      #         }
+      #       end
+      #     end
+      #
+      #     class SessionHelper
+      #       extend ConstStaticMethod
+      #
+      #       # @return [String] UUID
+      #       @thread_local_cache >> :session_uuid
+      #       def self.session_uuid
+      #         SecureRandom.uuid
+      #       end
+      #     end
+      #
+      def >>: (untyped other) -> untyped
+
+      # <!--
+      #   rdoc-file=lib/swank/decorators/ivar_dsl.rb
+      #   - >=(other)
+      # -->
+      #
+      alias >= >>
+    end
+  end
+end

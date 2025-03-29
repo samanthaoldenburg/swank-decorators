@@ -1,0 +1,33 @@
+# <!-- rdoc-file=lib/swank.rb -->
+# Top-level namespace
+#
+# <!-- rdoc-file=lib/swank/decorators/decoration_injection.rb -->
+# lib/decoration_injection.rb
+#
+# <!-- rdoc-file=sig/swank.rbs -->
+# Top-level namespace
+#
+module Swank
+  module Decorators
+    # <!-- rdoc-file=lib/swank/decorators/decorator_execution_chain.rb -->
+    # The `func` referenced when defining decorators.
+    #
+    # A special proc that retains useful context for decorators.
+    #
+    # <!-- rdoc-file=sig/swank/decorators/decorator_execution_chain.rbs -->
+    # The `func` referenced when defining decorators.
+    # A special proc that retains useful context for decorators.
+    #
+    class DecoratorExecutionChain < Proc
+      # <!--
+      #   rdoc-file=lib/swank/decorators/decorator_execution_chain.rb
+      #   - method_name()
+      # -->
+      # The name of the method we are currently applying decorators to
+      #
+      # @return [Symbol]
+      #
+      def method_name: () -> untyped
+    end
+  end
+end

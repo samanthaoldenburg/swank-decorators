@@ -1,6 +1,28 @@
 module Swank
   module Decorators
-    VERSION: String
-    # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+    @swank_decorators: untyped
+
+    def def_decorator: (Symbol name) {
+      (Proc func, *untyped args, **untyped kwargs) -> untyped
+    } -> Class[Swank::Decorators::DecoratorWithoutContext]
+
+    def def_decorator_factory: (Symbol name) {
+      (*untyped args, **untyped kwargs) -> Proc
+    } -> Class[Swank::Decorators::DecoratorWithoutContext]
+
+    def swank_decorators: () -> untyped
+
+    def included: (untyped obj) -> untyped
+
+    def bind_to_object!: (untyped obj) -> untyped
+
+    class Error < StandardError
+    end
+
+    private
+
+    def set_decorator: (untyped decorator_class, untyped name) { () -> untyped } -> untyped
+
+    def need_to_set_decorator_class?: (untyped name, new_class: untyped) -> (true | untyped)
   end
 end

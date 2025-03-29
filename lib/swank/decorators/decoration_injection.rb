@@ -5,7 +5,6 @@ module Swank
     # The module that actually overrides methods to run the decorators
     module DecorationInjection
       # Behavior shared by {InstanceLevel} and {SingletonLevel}
-      # @api private
       module SharedModuleLevelBehavior
         def clone(*)
           super.tap { |m| m.instance_variable_set(:@decorator_chains, {}) }
@@ -18,8 +17,8 @@ module Swank
 
         # Add decorators to the chain of the given method
         #
-        # @param method_name [Symbol] the method we're adding decorators to
-        # @param decorator_chain [DecoratorBase] a linked list of decorators
+        # @param [Symbol] method_name  the method we're adding decorators to
+        # @param [DecoratorBase] decorator_chain  a linked list of decorators
         # @return [DecoratorBase] the new decorator chain
         def add_to_decorator_chain!(method_name, decorator_chain)
           if decorator_chains[method_name]
@@ -33,7 +32,7 @@ module Swank
         end
 
         # Create the prepended method that will execute the decorations for a method
-        # @param method_name [Symbol] the method we're adding decorators to
+        # @param [Symbol] method_name  the method we're adding decorators to
         # @return [void]
         def create_decoration_method!(method_name)
           class_eval <<~RUBY, __FILE__, __LINE__ + 1
@@ -49,6 +48,13 @@ module Swank
       # Behavior prepended by {InstanceLevel} and {SingletonLevel}
       # @api private
       module SharedPrependedBehavior
+        # Wrap the method with its assigned decorations and run it
+        #
+        # @param [Object] args the positional arguments passed to the method
+        #   we're decorating
+        # @param [Object] kwargs the keyword arguments passed to the method
+        #   we're decorating
+        # @yieldreturn [Object] the output of the original method
         def run_decorations(method_name, *args, **kwargs, &block)
           call_sequence = fetch_swank_decorator_chain(method_name)
 
@@ -81,7 +87,7 @@ module Swank
         extend SharedModuleLevelBehavior
         include SharedPrependedBehavior
 
-        # The name of this module should have when working with `const_set`
+        # The name of this module should have when working with +const_set+
         CONST_NAME = :SwankDecorationInjection
 
         def self.prepend_to(obj)
@@ -91,6 +97,7 @@ module Swank
           modul
         end
 
+        # @return [DecoratorBase]
         def fetch_swank_decorator_chain(method_name)
           self.class::SwankDecorationInjection.decorator_chains[method_name]
         end
@@ -103,7 +110,7 @@ module Swank
         extend SharedModuleLevelBehavior
         include SharedPrependedBehavior
 
-        # The name of this module should have when working with `const_set`
+        # The name of this module should have when working with +const_set+
         CONST_NAME = :SwankSingletonDecorationInjection
 
         # Prepend this module to the singleton class
